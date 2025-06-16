@@ -1,8 +1,22 @@
+:root {
+    --primary-light: #6c63ff;
+    --primary-dark: #4a42f8;
+    --text-light: #333;
+    --text-dark: #f5f5f5;
+    --bg-light: #f0f2f5;
+    --bg-dark: #1a1a2e;
+    --card-bg-light: rgba(255, 255, 255, 0.8);
+    --card-bg-dark: rgba(30, 30, 60, 0.8);
+    --shadow-light: 0 8px 30px rgba(0, 0, 0, 0.1);
+    --shadow-dark: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
 
 body {
@@ -10,8 +24,34 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%);
+    background-size: 300% 300%;
     padding: 20px;
+}
+
+body.light-mode {
+    background: linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%);
+    color: var(--text-light);
+}
+
+body.dark-mode {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: var(--text-dark);
+}
+
+.glass-effect {
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: var(--shadow-light);
+}
+
+body.light-mode .glass-effect {
+    background-color: var(--card-bg-light);
+    box-shadow: var(--shadow-light);
+}
+
+body.dark-mode .glass-effect {
+    background-color: var(--card-bg-dark);
+    box-shadow: var(--shadow-dark);
 }
 
 .container {
@@ -30,11 +70,11 @@ body {
 
 .logo i {
     font-size: 2.5rem;
-    color: #6c63ff;
+    color: var(--primary-light);
     margin-right: 10px;
 }
 
-h1 {
+h1, h2 {
     font-weight: 600;
     margin-bottom: 20px;
 }
