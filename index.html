@@ -21,6 +21,38 @@
             <button class="tab-btn active" data-tab="login">Login</button>
             <button class="tab-btn" data-tab="signup">Signup</button>
         </div>
+
+        <div class="tab-content" id="login">
+            <form id="login-form">
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" placeholder="Email" id="login-email" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" placeholder="Password" id="login-password" required>
+                </div>
+                <button type="submit" class="btn-primary">Login</button>
+            </form>
+        </div>
+
+        <div class="tab-content" id="signup" style="display: none;">
+            <form id="signup-form">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" placeholder="Username" id="signup-username" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" placeholder="Email" id="signup-email" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" placeholder="Password" id="signup-password" required>
+                </div>
+                <button type="submit" class="btn-primary">Create Account</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>

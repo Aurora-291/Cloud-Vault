@@ -35,6 +35,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             tabBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            document.getElementById(tabId).style.display = 'block';
         });
     });
 
