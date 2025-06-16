@@ -78,3 +78,58 @@ h1, h2 {
     font-weight: 600;
     margin-bottom: 20px;
 }
+
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1000;
+    font-size: 1.2rem;
+}
+
+body.light-mode .theme-toggle {
+    background-color: var(--card-bg-light);
+    color: var(--primary-dark);
+}
+
+body.dark-mode .theme-toggle {
+    background-color: var(--card-bg-dark);
+    color: #ffcc00;
+}
+
+.auth-tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    padding: 10px 20px;
+    margin: 0 5px;
+    border-radius: 30px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+body.light-mode .tab-btn {
+    color: var(--text-light);
+}
+
+body.dark-mode .tab-btn {
+    color: var(--text-dark);
+}
+
+.tab-btn.active {
+    background-color: var(--primary-light);
+    color: white;
+}
