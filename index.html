@@ -6,13 +6,16 @@
     <title>CloudVault - File & Clipboard Manager</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body class="light-mode">
     <div class="theme-toggle">
         <i class="fas fa-moon"></i>
     </div>
 
-    <div class="container glass-effect">
+    <div class="container glass-effect" id="auth-container">
         <div class="logo">
             <i class="fas fa-cloud"></i>
             <h1>CloudVault</h1>
