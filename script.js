@@ -268,6 +268,18 @@ document.addEventListener('DOMContentLoaded', () => {
             filesList.innerHTML = '<div class="empty-message">No files uploaded yet</div>';
             return;
         }
+
+        const downloadBtn = fileElement.querySelector('.download-btn');
+            downloadBtn.addEventListener('click', () => {
+                downloadFile(fileId, fileData.name, fileData.totalChunks);
+            });
+            
+            const deleteBtn = fileElement.querySelector('.delete-btn');
+            deleteBtn.addEventListener('click', () => {
+                deleteFile(fileId, fileData.name, fileData.totalChunks);
+            });
+            
+            filesList.appendChild(fileElement);
         
         filesSnapshot.forEach(doc => {
             const fileData = doc.data();
@@ -328,6 +340,64 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Error loading files:', error);
         filesList.innerHTML = '<div class="error-message">Error loading files</div>';
     }
+    async function downloadFile(fileId, fileName, totalChunks) {
+    try {
+        progressContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+        progressText.textContent = 'Preparing download...';
+        
+        let fileContent = '';
+        
+        for (let i = 0; i < totalChunks; i++) {
+            const chunkDoc = await db.collection('users').doc(currentUser.uid)
+                .collection('fileChunks').doc(`${fileId}_${i}`)
+                .get();
+            
+            if (chunkDoc.exists) {
+                fileContent += chunkDoc.data().data;
+            } else {
+                throw new Error(`Chunk ${i} not found`);
+            }
+            
+            const progress = Math.min(100, Math.round(((i + 1) / totalChunks) * 100));
+            progressBar.style.width = `${progress}%`;
+            progressText.textContent = `${progress}%`;
+        }
+        
+        const contentType = fileContent.split(',')[0].split(':')[1].split(';')[0];
+        const base64Data = fileContent.split(',')[1];
+        
+        const byteCharacters = atob(base64Data);
+        const byteArrays = [];
+        
+        for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+            const slice = byteCharacters.slice(offset, offset + 512);
+            const byteNumbers = new Array(slice.length);
+            
+            for (let i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+            }
+            
+            const byteArray = new Uint8Array(byteNumbers);
+            byteArrays.push(byteArray);
+        }
+        
+        const blob = new Blob(byteArrays, {type: contentType});
+        
+        const downloadUrl = URL.createObjectURL(blob);
+        const downloadLink = document.createElement('a');
+        downloadLink.href = downloadUrl;
+        downloadLink.download = fileName;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        
+        progressContainer.style.display = 'none';
+    } catch (error) {
+        alert(`Error downloading file: ${error.message}`);
+        progressContainer.style.display = 'none';
+    }
+}
 }
 
     initApp();
