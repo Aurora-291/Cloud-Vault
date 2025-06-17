@@ -26,6 +26,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('logout-btn');
     const fileSection = document.getElementById('file-section');
     const clipboardSection = document.getElementById('clipboard-section');
+    const fileUpload = document.getElementById('file-upload');
+    const uploadArea = document.querySelector('.upload-area');
+    const progressContainer = document.querySelector('.progress-container');
+    const progressBar = document.getElementById('upload-progress');
+    const progressText = document.getElementById('progress-text');
+    const filesList = document.getElementById('files-list');
 
     let currentUser = null;
 
@@ -54,6 +60,38 @@ document.addEventListener('DOMContentLoaded', () => {
             icon.classList.remove('fa-moon');
             icon.classList.add('fa-sun');
         }
+    }
+
+    function initApp() {
+        loadTheme();
+        
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                fetchUserProfile();
+                showDashboard();
+            } else {
+                authContainer.style.display = 'block';
+                dashboardContainer.style.display = 'none';
+            }
+        });
+    }
+
+    function fetchUserProfile() {
+        db.collection('users').doc(currentUser.uid).get()
+            .then(doc => {
+                if (!doc.exists) {
+                    const displayName = currentUser.email.split('@')[0];
+                    db.collection('users').doc(currentUser.uid).set({
+                        username: displayName,
+                        email: currentUser.email,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    usernameDisplay.textContent = displayName;
+                } else {
+                    usernameDisplay.textContent = doc.data().username;
+                }
+            });
     }
 
     tabBtns.forEach(btn => {
@@ -101,37 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     });
 
-    function initApp() {
-        loadTheme();
-        
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                currentUser = user;
-                fetchUserProfile();
-                showDashboard();
-            } else {
-                authContainer.style.display = 'block';
-                dashboardContainer.style.display = 'none';
-            }
-        });
-    }
-    function fetchUserProfile() {
-        db.collection('users').doc(currentUser.uid).get()
-            .then(doc => {
-                if (!doc.exists) {
-                    const displayName = currentUser.email.split('@')[0];
-                    db.collection('users').doc(currentUser.uid).set({
-                        username: displayName,
-                        email: currentUser.email,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    usernameDisplay.textContent = displayName;
-                } else {
-                    usernameDisplay.textContent = doc.data().username;
-                }
-            });
-    }
-
     function showDashboard() {
         authContainer.style.display = 'none';
         dashboardContainer.style.display = 'flex';
@@ -158,6 +165,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     logoutBtn.addEventListener('click', () => {
         auth.signOut();
+    });
+
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#6c63ff';
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.style.borderColor = '';
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '';
+        
+        if (e.dataTransfer.files.length) {
+            console.log('Files dropped:', e.dataTransfer.files);
+        }
+    });
+
+    fileUpload.addEventListener('change', () => {
+        if (fileUpload.files.length) {
+            console.log('Files selected:', fileUpload.files);
+        }
     });
 
     initApp();
