@@ -19,6 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const signupForm = document.getElementById('signup-form');
     const authContainer = document.getElementById('auth-container');
+    const dashboardContainer = document.getElementById('dashboard-container');
+    const usernameDisplay = document.getElementById('username-display');
+    const selectFileBtn = document.getElementById('select-file-btn');
+    const clipboardBtn = document.getElementById('clipboard-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const fileSection = document.getElementById('file-section');
+    const clipboardSection = document.getElementById('clipboard-section');
 
     let currentUser = null;
 
@@ -100,12 +107,58 @@ document.addEventListener('DOMContentLoaded', () => {
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
-                console.log('User authenticated');
+                fetchUserProfile();
+                showDashboard();
             } else {
                 authContainer.style.display = 'block';
+                dashboardContainer.style.display = 'none';
             }
         });
     }
+    function fetchUserProfile() {
+        db.collection('users').doc(currentUser.uid).get()
+            .then(doc => {
+                if (!doc.exists) {
+                    const displayName = currentUser.email.split('@')[0];
+                    db.collection('users').doc(currentUser.uid).set({
+                        username: displayName,
+                        email: currentUser.email,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    usernameDisplay.textContent = displayName;
+                } else {
+                    usernameDisplay.textContent = doc.data().username;
+                }
+            });
+    }
+
+    function showDashboard() {
+        authContainer.style.display = 'none';
+        dashboardContainer.style.display = 'flex';
+    }
+
+    function setActiveSection(btn, section) {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        document.querySelectorAll('.section-container').forEach(s => {
+            s.style.display = 'none';
+        });
+        
+        section.style.display = 'block';
+    }
+
+    selectFileBtn.addEventListener('click', () => {
+        setActiveSection(selectFileBtn, fileSection);
+    });
+
+    clipboardBtn.addEventListener('click', () => {
+        setActiveSection(clipboardBtn, clipboardSection);
+    });
+
+    logoutBtn.addEventListener('click', () => {
+        auth.signOut();
+    });
 
     initApp();
 });

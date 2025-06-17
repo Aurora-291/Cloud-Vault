@@ -206,3 +206,129 @@ input[type="password"]:focus {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
 }
+
+.dashboard {
+    width: 100%;
+    max-width: 1200px;
+    min-height: 700px;
+    display: flex;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 250px;
+    padding: 30px 0;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.light-mode .sidebar {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+body.dark-mode .sidebar {
+    background-color: rgba(20, 20, 40, 0.9);
+}
+
+.sidebar .logo {
+    margin-bottom: 40px;
+}
+
+.sidebar .logo i {
+    font-size: 2rem;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 20px;
+    margin-bottom: 40px;
+}
+
+.avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    font-size: 2.5rem;
+}
+
+body.light-mode .avatar {
+    background-color: #f0f0f0;
+    color: var(--primary-light);
+}
+
+body.dark-mode .avatar {
+    background-color: #252545;
+    color: var(--primary-light);
+}
+
+.nav-menu {
+    display: flex;
+    flex-direction: column;
+    padding: 0 20px;
+}
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+body.light-mode .nav-btn {
+    background-color: transparent;
+    color: var(--text-light);
+}
+
+body.dark-mode .nav-btn {
+    background-color: transparent;
+    color: var(--text-dark);
+}
+
+.nav-btn i {
+    margin-right: 15px;
+    font-size: 1.2rem;
+}
+
+.nav-btn.active {
+    background-color: var(--primary-light);
+    color: white;
+}
+
+.nav-btn:hover:not(.active) {
+    background-color: rgba(108, 99, 255, 0.1);
+}
+
+.main-content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.section-header h2 {
+    font-size: 1.8rem;
+    margin: 0;
+}
+
+.section-header i {
+    margin-right: 10px;
+    color: var(--primary-light);
+}

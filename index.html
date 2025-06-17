@@ -57,5 +57,50 @@
             </form>
         </div>
     </div>
+    <div class="dashboard glass-effect" id="dashboard-container" style="display: none;">
+        <div class="sidebar">
+            <div class="logo">
+                <i class="fas fa-cloud"></i>
+                <h2>CloudVault</h2>
+            </div>
+            <div class="user-info">
+                <div class="avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <span id="username-display"></span>
+            </div>
+            <div class="nav-menu">
+                <button id="select-file-btn" class="nav-btn active">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Files</span>
+                </button>
+                <button id="clipboard-btn" class="nav-btn">
+                    <i class="fas fa-clipboard"></i>
+                    <span>Clipboard</span>
+                </button>
+                <button id="logout-btn" class="nav-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="section-container" id="file-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-file-alt"></i> Files</h2>
+                </div>
+            </div>
+
+            <div class="section-container" id="clipboard-section" style="display: none;">
+                <div class="section-header">
+                    <h2><i class="fas fa-clipboard"></i> Clipboard</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
 </body>
 </html>
