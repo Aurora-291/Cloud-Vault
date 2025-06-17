@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const filesList = document.getElementById('files-list');
 
     let currentUser = null;
+    const MAX_CHUNK_SIZE = 900000;
 
     themeToggle.addEventListener('click', () => {
         document.body.classList.toggle('dark-mode');
@@ -142,6 +143,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function showDashboard() {
         authContainer.style.display = 'none';
         dashboardContainer.style.display = 'flex';
+        
+        loadFiles();
     }
 
     function setActiveSection(btn, section) {
@@ -181,15 +184,123 @@ document.addEventListener('DOMContentLoaded', () => {
         uploadArea.style.borderColor = '';
         
         if (e.dataTransfer.files.length) {
-            console.log('Files dropped:', e.dataTransfer.files);
+            handleFiles(e.dataTransfer.files);
         }
     });
 
     fileUpload.addEventListener('change', () => {
         if (fileUpload.files.length) {
-            console.log('Files selected:', fileUpload.files);
+            handleFiles(fileUpload.files);
         }
     });
+
+    function handleFiles(files) {
+        Array.from(files).forEach(file => {
+            uploadFileInChunks(file);
+        });
+    }
+
+    function uploadFileInChunks(file) {
+        const reader = new FileReader();
+        progressContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+        progressText.textContent = '0%';
+
+        reader.onload = async (e) => {
+            const fileData = e.target.result;
+            const totalChunks = Math.ceil(fileData.length / MAX_CHUNK_SIZE);
+            
+            const fileMetadata = {
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                totalChunks: totalChunks,
+                dateAdded: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            try {
+                const fileRef = await db.collection('users').doc(currentUser.uid)
+                    .collection('files').add(fileMetadata);
+                
+                for (let i = 0; i < totalChunks; i++) {
+                    const start = i * MAX_CHUNK_SIZE;
+                    const end = Math.min(fileData.length, start + MAX_CHUNK_SIZE);
+                    const chunk = fileData.slice(start, end);
+                    
+                    await db.collection('users').doc(currentUser.uid)
+                        .collection('fileChunks').doc(`${fileRef.id}_${i}`)
+                        .set({
+                            fileId: fileRef.id,
+                            chunkIndex: i,
+                            data: chunk,
+                            dateAdded: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    
+                    const progress = Math.min(100, Math.round(((i + 1) / totalChunks) * 100));
+                    progressBar.style.width = `${progress}%`;
+                    progressText.textContent = `${progress}%`;
+                }
+                
+                alert(`File ${file.name} uploaded successfully!`);
+                progressContainer.style.display = 'none';
+                loadFiles();
+            } catch (error) {
+                alert(`Error uploading file: ${error.message}`);
+                progressContainer.style.display = 'none';
+            }
+        };
+        
+        reader.readAsDataURL(file);
+    }
+
+    async function loadFiles() {
+        if (!currentUser) return;
+        
+        try {
+            const filesSnapshot = await db.collection('users').doc(currentUser.uid)
+                .collection('files')
+                .orderBy('dateAdded', 'desc')
+                .get();
+            
+            filesList.innerHTML = '';
+            
+            if (filesSnapshot.empty) {
+                filesList.innerHTML = '<div class="empty-message">No files uploaded yet</div>';
+                return;
+            }
+            
+            filesSnapshot.forEach(doc => {
+                const fileData = doc.data();
+                const fileId = doc.id;
+                
+                const fileElement = document.createElement('div');
+                fileElement.className = 'file-item glass-effect';
+                
+                const date = fileData.dateAdded ? new Date(fileData.dateAdded.toDate()) : new Date();
+                const formattedDate = date.toLocaleDateString('en-US', {
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric'
+                });
+                
+                const fileSizeMB = (fileData.size / (1024 * 1024)).toFixed(2);
+                
+                fileElement.innerHTML = `
+                    <div class="file-name">${fileData.name}</div>
+                    <div class="file-meta">${fileSizeMB} MB · ${formattedDate}</div>
+                    <div class="file-actions">
+                        <button class="download-btn">Download</button>
+                        <button class="delete-btn">Delete</button>
+                    </div>
+                `;
+                
+                filesList.appendChild(fileElement);
+            });
+        } catch (error) {
+            console.error('Error loading files:', error);
+            filesList.innerHTML = '<div class="error-message">Error loading files</div>';
+        }
+    }
 
     initApp();
 });

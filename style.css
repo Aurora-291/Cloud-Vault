@@ -490,6 +490,39 @@ body.dark-mode .clipboard-item {
     filter: brightness(1.1);
 }
 
+.empty-message, .error-message {
+    text-align: center;
+    padding: 40px 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+body.light-mode .empty-message {
+    background-color: rgba(108, 99, 255, 0.05);
+    color: #666;
+}
+
+body.dark-mode .empty-message {
+    background-color: rgba(108, 99, 255, 0.1);
+    color: #aaa;
+}
+
+body.light-mode .error-message {
+    background-color: rgba(244, 67, 54, 0.05);
+    color: #d32f2f;
+}
+
+body.dark-mode .error-message {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #f44336;
+}
+
+.file-meta {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    margin-bottom: 15px;
+}
+
 .clipboard-input {
     margin-bottom: 30px;
     padding: 20px;
