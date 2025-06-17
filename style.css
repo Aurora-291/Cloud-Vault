@@ -419,7 +419,8 @@ body.dark-mode .upload-area {
     border-radius: 15px;
     padding: 20px;
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    gap: 15px;
     transition: all 0.3s;
 }
 
@@ -439,12 +440,27 @@ body.dark-mode .clipboard-item {
     transform: translateY(-5px);
 }
 
-.file-name, .clipboard-text {
+.file-info {
     flex: 1;
-    margin-bottom: 15px;
+}
+
+.file-name, .clipboard-text {
+    font-weight: 600;
+    margin-bottom: 5px;
     word-break: break-word;
     font-size: 0.95rem;
     line-height: 1.5;
+}
+
+.file-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--primary-light);
 }
 
 .file-name {
@@ -468,14 +484,18 @@ body.dark-mode .clipboard-item {
 }
 
 .file-actions button, .clipboard-actions button {
-    padding: 8px 15px;
+    padding: 10px;
     border-radius: 8px;
     border: none;
     color: white;
     cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 600;
+    font-size: 0.9rem;
     transition: all 0.2s;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .file-actions button:first-child, .clipboard-actions button:first-child {
@@ -520,7 +540,7 @@ body.dark-mode .error-message {
 .file-meta {
     font-size: 0.8rem;
     opacity: 0.7;
-    margin-bottom: 15px;
+    margin: 0;
 }
 
 .clipboard-input {

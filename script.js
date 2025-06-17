@@ -254,53 +254,81 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function loadFiles() {
-        if (!currentUser) return;
+    if (!currentUser) return;
+    
+    try {
+        const filesSnapshot = await db.collection('users').doc(currentUser.uid)
+            .collection('files')
+            .orderBy('dateAdded', 'desc')
+            .get();
         
-        try {
-            const filesSnapshot = await db.collection('users').doc(currentUser.uid)
-                .collection('files')
-                .orderBy('dateAdded', 'desc')
-                .get();
+        filesList.innerHTML = '';
+        
+        if (filesSnapshot.empty) {
+            filesList.innerHTML = '<div class="empty-message">No files uploaded yet</div>';
+            return;
+        }
+        
+        filesSnapshot.forEach(doc => {
+            const fileData = doc.data();
+            const fileId = doc.id;
             
-            filesList.innerHTML = '';
+            const fileElement = document.createElement('div');
+            fileElement.className = 'file-item glass-effect';
             
-            if (filesSnapshot.empty) {
-                filesList.innerHTML = '<div class="empty-message">No files uploaded yet</div>';
-                return;
+            let fileIcon = 'fa-file';
+            if (fileData.type.includes('image')) {
+                fileIcon = 'fa-file-image';
+            } else if (fileData.type.includes('pdf')) {
+                fileIcon = 'fa-file-pdf';
+            } else if (fileData.type.includes('word')) {
+                fileIcon = 'fa-file-word';
+            } else if (fileData.type.includes('excel') || fileData.type.includes('sheet')) {
+                fileIcon = 'fa-file-excel';
+            } else if (fileData.type.includes('video')) {
+                fileIcon = 'fa-file-video';
+            } else if (fileData.type.includes('audio')) {
+                fileIcon = 'fa-file-audio';
+            } else if (fileData.type.includes('zip') || fileData.type.includes('archive')) {
+                fileIcon = 'fa-file-archive';
+            } else if (fileData.type.includes('code') || fileData.type.includes('javascript') || fileData.type.includes('html')) {
+                fileIcon = 'fa-file-code';
             }
             
-            filesSnapshot.forEach(doc => {
-                const fileData = doc.data();
-                const fileId = doc.id;
-                
-                const fileElement = document.createElement('div');
-                fileElement.className = 'file-item glass-effect';
-                
-                const date = fileData.dateAdded ? new Date(fileData.dateAdded.toDate()) : new Date();
-                const formattedDate = date.toLocaleDateString('en-US', {
-                    year: 'numeric', 
-                    month: 'short', 
-                    day: 'numeric'
-                });
-                
-                const fileSizeMB = (fileData.size / (1024 * 1024)).toFixed(2);
-                
-                fileElement.innerHTML = `
+            const date = fileData.dateAdded ? new Date(fileData.dateAdded.toDate()) : new Date();
+            const formattedDate = date.toLocaleDateString('en-US', {
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric'
+            });
+            
+            const fileSizeMB = (fileData.size / (1024 * 1024)).toFixed(2);
+            
+            fileElement.innerHTML = `
+                <div class="file-icon">
+                    <i class="fas ${fileIcon}"></i>
+                </div>
+                <div class="file-info">
                     <div class="file-name">${fileData.name}</div>
                     <div class="file-meta">${fileSizeMB} MB · ${formattedDate}</div>
-                    <div class="file-actions">
-                        <button class="download-btn">Download</button>
-                        <button class="delete-btn">Delete</button>
-                    </div>
-                `;
-                
-                filesList.appendChild(fileElement);
-            });
-        } catch (error) {
-            console.error('Error loading files:', error);
-            filesList.innerHTML = '<div class="error-message">Error loading files</div>';
-        }
+                </div>
+                <div class="file-actions">
+                    <button class="download-btn" data-file-id="${fileId}">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="delete-btn" data-file-id="${fileId}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            filesList.appendChild(fileElement);
+        });
+    } catch (error) {
+        console.error('Error loading files:', error);
+        filesList.innerHTML = '<div class="error-message">Error loading files</div>';
     }
+}
 
     initApp();
 });
