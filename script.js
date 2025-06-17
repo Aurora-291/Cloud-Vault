@@ -32,6 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressBar = document.getElementById('upload-progress');
     const progressText = document.getElementById('progress-text');
     const filesList = document.getElementById('files-list');
+    const clipboardText = document.getElementById('clipboard-text');
+    const saveClipboardBtn = document.getElementById('save-clipboard-btn');
+    const clipboardList = document.getElementById('clipboard-list');
 
     let currentUser = null;
     const MAX_CHUNK_SIZE = 900000;
@@ -143,8 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function showDashboard() {
         authContainer.style.display = 'none';
         dashboardContainer.style.display = 'flex';
-
         loadFiles();
+        loadClipboardItems();
     }
 
     function setActiveSection(btn, section) {
@@ -429,7 +432,176 @@ document.addEventListener('DOMContentLoaded', () => {
                     progressContainer.style.display = 'none';
                 }
             }
+            saveClipboardBtn.addEventListener('click', () => {
+                const text = clipboardText.value.trim();
+
+                if (!text) {
+                    alert('Please enter some text to save');
+                    return;
+                }
+
+                saveClipboardItem(text);
+            });
+
+            async function saveClipboardItem(text) {
+                if (!currentUser) return;
+
+                try {
+                    await db.collection('users').doc(currentUser.uid)
+                        .collection('clipboard').add({
+                            text: text,
+                            dateAdded: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+
+                    clipboardText.value = '';
+                    loadClipboardItems();
+                } catch (error) {
+                    alert(`Error saving clipboard item: ${error.message}`);
+                }
+            }
+
+            async function loadClipboardItems() {
+                if (!currentUser) return;
+
+                try {
+                    const clipboardSnapshot = await db.collection('users').doc(currentUser.uid)
+                        .collection('clipboard')
+                        .orderBy('dateAdded', 'desc')
+                        .get();
+
+                    clipboardList.innerHTML = '';
+
+                    if (clipboardSnapshot.empty) {
+                        clipboardList.innerHTML = '<div class="empty-message">No clipboard items saved yet</div>';
+                        return;
+                    }
+
+                    clipboardSnapshot.forEach(doc => {
+                        const clipboardData = doc.data();
+                        const clipboardId = doc.id;
+
+                        const clipboardElement = document.createElement('div');
+                        clipboardElement.className = 'clipboard-item glass-effect';
+
+                        const date = clipboardData.dateAdded ? new Date(clipboardData.dateAdded.toDate()) : new Date();
+                        const formattedDate = date.toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+
+                        const displayText = clipboardData.text.length > 100 ?
+                            clipboardData.text.substring(0, 100) + '...' :
+                            clipboardData.text;
+
+                        clipboardElement.innerHTML = `
+                <div class="clipboard-content">
+                    <div class="clipboard-text">${displayText}</div>
+                    <div class="clipboard-meta">${formattedDate}</div>
+                </div>
+                <div class="clipboard-actions">
+                    <button class="copy-btn" data-clipboard-id="${clipboardId}">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                    <button class="delete-clipboard-btn" data-clipboard-id="${clipboardId}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+
+                        const copyBtn = clipboardElement.querySelector('.copy-btn');
+                        copyBtn.addEventListener('click', () => {
+                            navigator.clipboard.writeText(clipboardData.text)
+                                .then(() => {
+                                    const originalIcon = copyBtn.innerHTML;
+                                    copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+                                    setTimeout(() => {
+                                        copyBtn.innerHTML = originalIcon;
+                                    }, 1500);
+                                })
+                                .catch(err => {
+                                    alert('Failed to copy text: ' + err);
+                                });
+                        });
+
+                        const deleteBtn = clipboardElement.querySelector('.delete-clipboard-btn');
+                        deleteBtn.addEventListener('click', () => {
+                            deleteClipboardItem(clipboardId);
+                        });
+
+                        clipboardList.appendChild(clipboardElement);
+                    });
+                } catch (error) {
+                    console.error('Error loading clipboard items:', error);
+                    clipboardList.innerHTML = '<div class="error-message">Error loading clipboard items</div>';
+                }
+            }
+
+            async function deleteClipboardItem(clipboardId) {
+                if (!confirm('Are you sure you want to delete this clipboard item?')) return;
+
+                try {
+                    await db.collection('users').doc(currentUser.uid)
+                        .collection('clipboard').doc(clipboardId)
+                        .delete();
+
+                    loadClipboardItems();
+                } catch (error) {
+                    alert(`Error deleting clipboard item: ${error.message}`);
+                }
+
+                function initDragAndDrop() {
+                    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                        document.body.addEventListener(eventName, preventDefaults, false);
+                    });
+
+                    function preventDefaults(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                }
+
+                function initKeyboardShortcuts() {
+                    document.addEventListener('keydown', (e) => {
+                        if (e.ctrlKey || e.metaKey) {
+                            switch (e.key) {
+                                case '1':
+                                    e.preventDefault();
+                                    selectFileBtn.click();
+                                    break;
+                                case '2':
+                                    e.preventDefault();
+                                    clipboardBtn.click();
+                                    break;
+                            }
+                        }
+                    });
+                }
+
+                function initKeyboardShortcuts() {
+                    document.addEventListener('keydown', (e) => {
+                        if (e.ctrlKey || e.metaKey) {
+                            switch (e.key) {
+                                case '1':
+                                    e.preventDefault();
+                                    selectFileBtn.click();
+                                    break;
+                                case '2':
+                                    e.preventDefault();
+                                    clipboardBtn.click();
+                                    break;
+                            }
+                        }
+                    });
+                }
+            }
+
+
         }
     }
     initApp();
+    initDragAndDrop();
+    initKeyboardShortcuts();
 });
