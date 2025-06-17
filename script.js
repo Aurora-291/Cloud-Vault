@@ -10,10 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     firebase.initializeApp(firebaseConfig);
-    
+
     const auth = firebase.auth();
     const db = firebase.firestore();
-    
+
     const themeToggle = document.querySelector('.theme-toggle');
     const tabBtns = document.querySelectorAll('.tab-btn');
     const loginForm = document.getElementById('login-form');
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     themeToggle.addEventListener('click', () => {
         document.body.classList.toggle('dark-mode');
         document.body.classList.toggle('light-mode');
-        
+
         const icon = themeToggle.querySelector('i');
         if (document.body.classList.contains('dark-mode')) {
             icon.classList.remove('fa-moon');
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
             icon.classList.remove('fa-sun');
             icon.classList.add('fa-moon');
         }
-        
+
         localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
     });
 
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initApp() {
         loadTheme();
-        
+
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
@@ -98,14 +98,14 @@ document.addEventListener('DOMContentLoaded', () => {
     tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const tabId = btn.getAttribute('data-tab');
-            
+
             tabBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
+
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.style.display = 'none';
             });
-            
+
             document.getElementById(tabId).style.display = 'block';
         });
     });
@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
-        
+
         auth.signInWithEmailAndPassword(email, password)
             .catch(error => {
                 alert(error.message);
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const username = document.getElementById('signup-username').value;
         const email = document.getElementById('signup-email').value;
         const password = document.getElementById('signup-password').value;
-        
+
         auth.createUserWithEmailAndPassword(email, password)
             .then(userCredential => {
                 return db.collection('users').doc(userCredential.user.uid).set({
@@ -143,18 +143,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function showDashboard() {
         authContainer.style.display = 'none';
         dashboardContainer.style.display = 'flex';
-        
+
         loadFiles();
     }
 
     function setActiveSection(btn, section) {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        
+
         document.querySelectorAll('.section-container').forEach(s => {
             s.style.display = 'none';
         });
-        
+
         section.style.display = 'block';
     }
 
@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
     uploadArea.addEventListener('drop', (e) => {
         e.preventDefault();
         uploadArea.style.borderColor = '';
-        
+
         if (e.dataTransfer.files.length) {
             handleFiles(e.dataTransfer.files);
         }
@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.onload = async (e) => {
             const fileData = e.target.result;
             const totalChunks = Math.ceil(fileData.length / MAX_CHUNK_SIZE);
-            
+
             const fileMetadata = {
                 name: file.name,
                 type: file.type,
@@ -217,16 +217,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 totalChunks: totalChunks,
                 dateAdded: firebase.firestore.FieldValue.serverTimestamp()
             };
-            
+
             try {
                 const fileRef = await db.collection('users').doc(currentUser.uid)
                     .collection('files').add(fileMetadata);
-                
+
                 for (let i = 0; i < totalChunks; i++) {
                     const start = i * MAX_CHUNK_SIZE;
                     const end = Math.min(fileData.length, start + MAX_CHUNK_SIZE);
                     const chunk = fileData.slice(start, end);
-                    
+
                     await db.collection('users').doc(currentUser.uid)
                         .collection('fileChunks').doc(`${fileRef.id}_${i}`)
                         .set({
@@ -235,12 +235,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             data: chunk,
                             dateAdded: firebase.firestore.FieldValue.serverTimestamp()
                         });
-                    
+
                     const progress = Math.min(100, Math.round(((i + 1) / totalChunks) * 100));
                     progressBar.style.width = `${progress}%`;
                     progressText.textContent = `${progress}%`;
                 }
-                
+
                 alert(`File ${file.name} uploaded successfully!`);
                 progressContainer.style.display = 'none';
                 loadFiles();
@@ -249,74 +249,74 @@ document.addEventListener('DOMContentLoaded', () => {
                 progressContainer.style.display = 'none';
             }
         };
-        
+
         reader.readAsDataURL(file);
     }
 
     async function loadFiles() {
-    if (!currentUser) return;
-    
-    try {
-        const filesSnapshot = await db.collection('users').doc(currentUser.uid)
-            .collection('files')
-            .orderBy('dateAdded', 'desc')
-            .get();
-        
-        filesList.innerHTML = '';
-        
-        if (filesSnapshot.empty) {
-            filesList.innerHTML = '<div class="empty-message">No files uploaded yet</div>';
-            return;
-        }
+        if (!currentUser) return;
 
-        const downloadBtn = fileElement.querySelector('.download-btn');
+        try {
+            const filesSnapshot = await db.collection('users').doc(currentUser.uid)
+                .collection('files')
+                .orderBy('dateAdded', 'desc')
+                .get();
+
+            filesList.innerHTML = '';
+
+            if (filesSnapshot.empty) {
+                filesList.innerHTML = '<div class="empty-message">No files uploaded yet</div>';
+                return;
+            }
+
+            const downloadBtn = fileElement.querySelector('.download-btn');
             downloadBtn.addEventListener('click', () => {
                 downloadFile(fileId, fileData.name, fileData.totalChunks);
             });
-            
+
             const deleteBtn = fileElement.querySelector('.delete-btn');
             deleteBtn.addEventListener('click', () => {
                 deleteFile(fileId, fileData.name, fileData.totalChunks);
             });
-            
+
             filesList.appendChild(fileElement);
-        
-        filesSnapshot.forEach(doc => {
-            const fileData = doc.data();
-            const fileId = doc.id;
-            
-            const fileElement = document.createElement('div');
-            fileElement.className = 'file-item glass-effect';
-            
-            let fileIcon = 'fa-file';
-            if (fileData.type.includes('image')) {
-                fileIcon = 'fa-file-image';
-            } else if (fileData.type.includes('pdf')) {
-                fileIcon = 'fa-file-pdf';
-            } else if (fileData.type.includes('word')) {
-                fileIcon = 'fa-file-word';
-            } else if (fileData.type.includes('excel') || fileData.type.includes('sheet')) {
-                fileIcon = 'fa-file-excel';
-            } else if (fileData.type.includes('video')) {
-                fileIcon = 'fa-file-video';
-            } else if (fileData.type.includes('audio')) {
-                fileIcon = 'fa-file-audio';
-            } else if (fileData.type.includes('zip') || fileData.type.includes('archive')) {
-                fileIcon = 'fa-file-archive';
-            } else if (fileData.type.includes('code') || fileData.type.includes('javascript') || fileData.type.includes('html')) {
-                fileIcon = 'fa-file-code';
-            }
-            
-            const date = fileData.dateAdded ? new Date(fileData.dateAdded.toDate()) : new Date();
-            const formattedDate = date.toLocaleDateString('en-US', {
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric'
-            });
-            
-            const fileSizeMB = (fileData.size / (1024 * 1024)).toFixed(2);
-            
-            fileElement.innerHTML = `
+
+            filesSnapshot.forEach(doc => {
+                const fileData = doc.data();
+                const fileId = doc.id;
+
+                const fileElement = document.createElement('div');
+                fileElement.className = 'file-item glass-effect';
+
+                let fileIcon = 'fa-file';
+                if (fileData.type.includes('image')) {
+                    fileIcon = 'fa-file-image';
+                } else if (fileData.type.includes('pdf')) {
+                    fileIcon = 'fa-file-pdf';
+                } else if (fileData.type.includes('word')) {
+                    fileIcon = 'fa-file-word';
+                } else if (fileData.type.includes('excel') || fileData.type.includes('sheet')) {
+                    fileIcon = 'fa-file-excel';
+                } else if (fileData.type.includes('video')) {
+                    fileIcon = 'fa-file-video';
+                } else if (fileData.type.includes('audio')) {
+                    fileIcon = 'fa-file-audio';
+                } else if (fileData.type.includes('zip') || fileData.type.includes('archive')) {
+                    fileIcon = 'fa-file-archive';
+                } else if (fileData.type.includes('code') || fileData.type.includes('javascript') || fileData.type.includes('html')) {
+                    fileIcon = 'fa-file-code';
+                }
+
+                const date = fileData.dateAdded ? new Date(fileData.dateAdded.toDate()) : new Date();
+                const formattedDate = date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+
+                const fileSizeMB = (fileData.size / (1024 * 1024)).toFixed(2);
+
+                fileElement.innerHTML = `
                 <div class="file-icon">
                     <i class="fas ${fileIcon}"></i>
                 </div>
@@ -333,72 +333,103 @@ document.addEventListener('DOMContentLoaded', () => {
                     </button>
                 </div>
             `;
-            
-            filesList.appendChild(fileElement);
-        });
-    } catch (error) {
-        console.error('Error loading files:', error);
-        filesList.innerHTML = '<div class="error-message">Error loading files</div>';
-    }
-    async function downloadFile(fileId, fileName, totalChunks) {
-    try {
-        progressContainer.style.display = 'block';
-        progressBar.style.width = '0%';
-        progressText.textContent = 'Preparing download...';
-        
-        let fileContent = '';
-        
-        for (let i = 0; i < totalChunks; i++) {
-            const chunkDoc = await db.collection('users').doc(currentUser.uid)
-                .collection('fileChunks').doc(`${fileId}_${i}`)
-                .get();
-            
-            if (chunkDoc.exists) {
-                fileContent += chunkDoc.data().data;
-            } else {
-                throw new Error(`Chunk ${i} not found`);
-            }
-            
-            const progress = Math.min(100, Math.round(((i + 1) / totalChunks) * 100));
-            progressBar.style.width = `${progress}%`;
-            progressText.textContent = `${progress}%`;
-        }
-        
-        const contentType = fileContent.split(',')[0].split(':')[1].split(';')[0];
-        const base64Data = fileContent.split(',')[1];
-        
-        const byteCharacters = atob(base64Data);
-        const byteArrays = [];
-        
-        for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-            const slice = byteCharacters.slice(offset, offset + 512);
-            const byteNumbers = new Array(slice.length);
-            
-            for (let i = 0; i < slice.length; i++) {
-                byteNumbers[i] = slice.charCodeAt(i);
-            }
-            
-            const byteArray = new Uint8Array(byteNumbers);
-            byteArrays.push(byteArray);
-        }
-        
-        const blob = new Blob(byteArrays, {type: contentType});
-        
-        const downloadUrl = URL.createObjectURL(blob);
-        const downloadLink = document.createElement('a');
-        downloadLink.href = downloadUrl;
-        downloadLink.download = fileName;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-        
-        progressContainer.style.display = 'none';
-    } catch (error) {
-        alert(`Error downloading file: ${error.message}`);
-        progressContainer.style.display = 'none';
-    }
-}
-}
 
+                filesList.appendChild(fileElement);
+            });
+        } catch (error) {
+            console.error('Error loading files:', error);
+            filesList.innerHTML = '<div class="error-message">Error loading files</div>';
+        }
+        async function downloadFile(fileId, fileName, totalChunks) {
+            try {
+                progressContainer.style.display = 'block';
+                progressBar.style.width = '0%';
+                progressText.textContent = 'Preparing download...';
+
+                let fileContent = '';
+
+                for (let i = 0; i < totalChunks; i++) {
+                    const chunkDoc = await db.collection('users').doc(currentUser.uid)
+                        .collection('fileChunks').doc(`${fileId}_${i}`)
+                        .get();
+
+                    if (chunkDoc.exists) {
+                        fileContent += chunkDoc.data().data;
+                    } else {
+                        throw new Error(`Chunk ${i} not found`);
+                    }
+
+                    const progress = Math.min(100, Math.round(((i + 1) / totalChunks) * 100));
+                    progressBar.style.width = `${progress}%`;
+                    progressText.textContent = `${progress}%`;
+                }
+
+                const contentType = fileContent.split(',')[0].split(':')[1].split(';')[0];
+                const base64Data = fileContent.split(',')[1];
+
+                const byteCharacters = atob(base64Data);
+                const byteArrays = [];
+
+                for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+                    const slice = byteCharacters.slice(offset, offset + 512);
+                    const byteNumbers = new Array(slice.length);
+
+                    for (let i = 0; i < slice.length; i++) {
+                        byteNumbers[i] = slice.charCodeAt(i);
+                    }
+
+                    const byteArray = new Uint8Array(byteNumbers);
+                    byteArrays.push(byteArray);
+                }
+
+                const blob = new Blob(byteArrays, {
+                    type: contentType
+                });
+
+                const downloadUrl = URL.createObjectURL(blob);
+                const downloadLink = document.createElement('a');
+                downloadLink.href = downloadUrl;
+                downloadLink.download = fileName;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+
+                progressContainer.style.display = 'none';
+            } catch (error) {
+                alert(`Error downloading file: ${error.message}`);
+                progressContainer.style.display = 'none';
+            }
+            async function deleteFile(fileId, fileName, totalChunks) {
+                if (!confirm(`Are you sure you want to delete ${fileName}?`)) return;
+
+                try {
+                    progressContainer.style.display = 'block';
+                    progressBar.style.width = '0%';
+                    progressText.textContent = 'Deleting file...';
+
+                    await db.collection('users').doc(currentUser.uid)
+                        .collection('files').doc(fileId)
+                        .delete();
+
+                    for (let i = 0; i < totalChunks; i++) {
+                        await db.collection('users').doc(currentUser.uid)
+                            .collection('fileChunks').doc(`${fileId}_${i}`)
+                            .delete();
+
+                        const progress = Math.min(100, Math.round(((i + 1) / totalChunks) * 100));
+                        progressBar.style.width = `${progress}%`;
+                        progressText.textContent = `${progress}%`;
+                    }
+
+                    alert(`File ${fileName} deleted successfully!`);
+                    progressContainer.style.display = 'none';
+                    loadFiles();
+                } catch (error) {
+                    alert(`Error deleting file: ${error.message}`);
+                    progressContainer.style.display = 'none';
+                }
+            }
+        }
+    }
     initApp();
 });

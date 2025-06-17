@@ -103,7 +103,8 @@ body.dark-mode .theme-toggle {
     margin-right: 10px;
 }
 
-h1, h2 {
+h1,
+h2 {
     font-weight: 600;
     margin-bottom: 20px;
 }
@@ -409,13 +410,15 @@ body.dark-mode .upload-area {
     font-weight: 600;
 }
 
-.files-list, .clipboard-list {
+.files-list,
+.clipboard-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px;
 }
 
-.file-item, .clipboard-item {
+.file-item,
+.clipboard-item {
     border-radius: 15px;
     padding: 20px;
     display: flex;
@@ -424,19 +427,20 @@ body.dark-mode .upload-area {
     transition: all 0.3s;
 }
 
-body.light-mode .file-item, 
+body.light-mode .file-item,
 body.light-mode .clipboard-item {
     background-color: rgba(255, 255, 255, 0.7);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
 }
 
-body.dark-mode .file-item, 
+body.dark-mode .file-item,
 body.dark-mode .clipboard-item {
     background-color: rgba(30, 30, 60, 0.7);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
-.file-item:hover, .clipboard-item:hover {
+.file-item:hover,
+.clipboard-item:hover {
     transform: translateY(-5px);
 }
 
@@ -444,7 +448,8 @@ body.dark-mode .clipboard-item {
     flex: 1;
 }
 
-.file-name, .clipboard-text {
+.file-name,
+.clipboard-text {
     font-weight: 600;
     margin-bottom: 5px;
     word-break: break-word;
@@ -477,13 +482,15 @@ body.dark-mode .clipboard-item {
     color: var(--primary-light);
 }
 
-.file-actions, .clipboard-actions {
+.file-actions,
+.clipboard-actions {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
 }
 
-.file-actions button, .clipboard-actions button {
+.file-actions button,
+.clipboard-actions button {
     padding: 10px;
     border-radius: 8px;
     border: none;
@@ -498,19 +505,23 @@ body.dark-mode .clipboard-item {
     justify-content: center;
 }
 
-.file-actions button:first-child, .clipboard-actions button:first-child {
+.file-actions button:first-child,
+.clipboard-actions button:first-child {
     background-color: var(--info);
 }
 
-.file-actions button:last-child, .clipboard-actions button:last-child {
+.file-actions button:last-child,
+.clipboard-actions button:last-child {
     background-color: var(--danger);
 }
 
-.file-actions button:hover, .clipboard-actions button:hover {
+.file-actions button:hover,
+.clipboard-actions button:hover {
     filter: brightness(1.1);
 }
 
-.empty-message, .error-message {
+.empty-message,
+.error-message {
     text-align: center;
     padding: 40px 20px;
     border-radius: 10px;
@@ -588,26 +599,27 @@ textarea:focus {
     .dashboard {
         flex-direction: column;
     }
-    
+
     .sidebar {
         width: 100%;
         border-right: none;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         padding: 20px;
     }
-    
+
     .nav-menu {
         flex-direction: row;
         justify-content: center;
         flex-wrap: wrap;
         gap: 10px;
     }
-    
+
     .nav-btn {
         width: auto;
     }
-    
-    .files-list, .clipboard-list {
+
+    .files-list,
+    .clipboard-list {
         grid-template-columns: 1fr;
     }
 }
