@@ -25,3 +25,8 @@ Back end : firebase
 * i learned a ton about async javascript like how to make the code wait for one chunk to finish before starting teh next one
 * also i totally meant to add keyboard shortcuts but i forgot to write the actual function for it you can see the empty call in the code lmao whoops.
 * i learned about base64 file system
+
+## Usage of AI
+* used ai to solve my errors which are not known how to solve by me
+* used ai for formating the code like alignment and arrangement
+* used ai in few parts of readme file when i dont know to convey what im trying to convey
